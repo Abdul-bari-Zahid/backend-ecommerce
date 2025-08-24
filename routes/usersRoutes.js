@@ -1,21 +1,20 @@
 
-import express from 'express';
-import { client } from '../dbConfig.js';
-import { ObjectId } from 'mongodb';
+import express from "express";
+import { client } from "../dbConfig.js";
+import { ObjectId } from "mongodb";
 
 const router = express.Router();
 const myDB = client.db("myEcommerce");
 const Users = myDB.collection("users");
 
 // Create User
-router.post('/users', async (req, res) => {
+router.post("/users", async (req, res) => {
   try {
     const user = req.body;
     if (!user.firstName || !user.email) {
       return res.status(400).json({ error: "firstName and email are required" });
     }
-
-    const response = await Users.insertOne(user);
+    const response = await Users.insertOne({ ...user, createdAt: new Date() });
     res.status(201).json({ message: "User created successfully", data: response });
   } catch (error) {
     res.status(500).json({ error: "Error creating user", details: error.message });
@@ -23,7 +22,7 @@ router.post('/users', async (req, res) => {
 });
 
 // Get All Users
-router.get('/users', async (req, res) => {
+router.get("/users", async (req, res) => {
   try {
     const users = await Users.find().toArray();
     res.json(users);
@@ -33,7 +32,7 @@ router.get('/users', async (req, res) => {
 });
 
 // Get Single User by ID
-router.get('/users/:id', async (req, res) => {
+router.get("/users/:id", async (req, res) => {
   try {
     const user = await Users.findOne({ _id: new ObjectId(req.params.id) });
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -44,17 +43,15 @@ router.get('/users/:id', async (req, res) => {
 });
 
 // Update User by ID
-router.put('/users/:id', async (req, res) => {
+router.put("/users/:id", async (req, res) => {
   try {
     const result = await Users.updateOne(
       { _id: new ObjectId(req.params.id) },
       { $set: req.body }
     );
-
     if (result.matchedCount === 0) {
       return res.status(404).json({ message: "User not found" });
     }
-
     res.json({ message: "User updated successfully" });
   } catch (error) {
     res.status(500).json({ error: "Error updating user", details: error.message });
@@ -62,7 +59,7 @@ router.put('/users/:id', async (req, res) => {
 });
 
 // Delete User by ID
-router.delete('/users/:id', async (req, res) => {
+router.delete("/users/:id", async (req, res) => {
   try {
     const result = await Users.deleteOne({ _id: new ObjectId(req.params.id) });
     if (result.deletedCount === 0) {
