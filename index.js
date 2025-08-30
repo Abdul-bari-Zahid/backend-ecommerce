@@ -1,5 +1,3 @@
-
-
 import express from "express";
 import cors from "cors";
 import path from "path";
@@ -18,16 +16,13 @@ import { authMiddleware } from "./middlewares/authMiddleware.js";
 
 const app = express();
 const port = process.env.PORT || 3001;
-
-// Core middleware
+ 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static images
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
-// DB connect first, then mount routes
 client
   .connect()
   .then(() => {
@@ -36,7 +31,6 @@ client
     // Public auth routes
     app.use("/api/auth", authRoutes);
 
-    // Protected APIs (if you want all protected)
     app.use("/api", authMiddleware);
 
     app.use("/api", userRoutes);
